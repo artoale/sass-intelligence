@@ -1,0 +1,23 @@
+{
+  "name": "sass-intelligence",
+  "version": "0.0.0",
+  "homepage": "https://github.com/artoale/sass-intelligence",
+  "authors": [
+    "Alessandro Artoni <artoale@gmail.com>"
+  ],
+  "description": "Code intelligence and hinting service for SCSS",
+  "main": "main.js",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "chai": "~1.8.0",
+    "requirejs": "~2.1.8"
+  }
+}
