@@ -11,8 +11,13 @@ for (file in window.__karma__.files) {
 requirejs.config({
     // Karma serves files from '/base'
     baseUrl: '/base/test',
-
+    packages: [{
+      name: 'di',
+      location: '../node_modules/di/build',
+      main: 'index'
+    }],
     paths: {
+//        'di': '../node_modules/di/build/index',
         'chai': '../bower_components/chai/chai'
     },
 

@@ -1,0 +1,31 @@
+{
+  "name": "sass-intelligence",
+  "version": "0.0.0",
+  "description": "Code hinting for SASS",
+  "main": "main.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/artoale/sass-intelligence.git"
+  },
+  "keywords": [
+    "SASS",
+    "SCSS",
+    "hint"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/artoale/sass-intelligence/issues"
+  },
+  "devDependenies": {
+  },
+  "dependencies": {
+    "urequire": "~0.6.2-1"
+  }
+}
