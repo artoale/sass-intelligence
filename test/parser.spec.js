@@ -8,6 +8,9 @@ if (typeof module === 'object' && typeof define !== 'function') {
 
 define(function (require, exports, module) {
     'use strict';
+
+    var di = require('di');
+
     var parserMaker = require('../src/parser.js');
     var expect = require('chai').expect;
     describe('parser', function () {

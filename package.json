@@ -2,12 +2,21 @@
   "name": "sass-intelligence",
   "version": "0.0.0",
   "description": "A SASS code analyzer for deep, cross-editor language support",
+  "main": "main.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/artoale/sass-intelligence.git"
   },
   "keywords": [
-    "SASS"
+    "SASS",    
+	"SCSS",
+    "hint"
   ],
   "license": "BSD",
   "bugs": {

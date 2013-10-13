@@ -20,6 +20,9 @@ module.exports = function (config) {
                 pattern: 'bower_components/**/*.js',
                 included: false
             }, {
+                pattern: 'node_modules/**/*.js',
+                included: false
+            },{
                 pattern: 'test/**/*.spec.js',
                 included: false
             },
