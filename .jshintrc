@@ -6,6 +6,7 @@
         "module": true,
         "beforeEach":true
     },
+    "node": true,
     "eqeqeq": true,
     "curly": true,
     "camelcase": true,
