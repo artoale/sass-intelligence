@@ -28,6 +28,7 @@ define(function (require, exports, module) {
             /@import\s*['"]{0,1}\s*url/
         ];
 
+
         var filterCssImports = function (imports) {
             var filtered = imports.filter(function (imported) {
                 return filterRules.every(function (regexp) {

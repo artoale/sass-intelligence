@@ -30,16 +30,16 @@ define(function (require) {
 
             it('should extract all the @import directives from a string', function () {
                 var parser = parserMaker();
-                var testString = ["bla bla bla",
-                                  "   @import cazzitua;",
-                                  "   @import url('cazzimia'); asdasd",
-                                  "oh, cristo cristo"
+                var testString = ['bla bla bla',
+                                  '   @import cazzitua;',
+                                  '   @import url(\'cazzimia\'); asdasd',
+                                  'oh, cristo cristo'
                 ].join('\n');
                 var result = parser.extractImportDirectives(testString);
                 expect(Array.isArray(result)).to.be.true;
                 expect(result).to.have.length(2);
                 expect(result[0]).to.equal('@import cazzitua');
-                expect(result[1]).to.equal("@import url('cazzimia')");
+                expect(result[1]).to.equal('@import url(\'cazzimia\')');
             });
         });
 
@@ -50,10 +50,10 @@ define(function (require) {
             });
             it('should remove imports to .css files', function () {
                 var imports = [
-                    "@import 'something.css'",
-                    "@import 'something.css '",
-                    "@import \"something.css\"",
-                    "@import 'actualScss'"
+                    '@import \'something.css',
+                    '@import \'something.css ',
+                    '@import "something.css"',
+                    '@import \'actualScss\''
                 ];
 
                 var filtered = filterCssImports(imports);
@@ -62,11 +62,11 @@ define(function (require) {
             });
             it('should remove imports with url', function () {
                 var imports = [
-                    "@import url('something')",
-                    "@import    'url()'",
-                    "@import    \" url() \"",
-                    "@import url(\"something\")",
-                    "@import 'actualScss'"
+                    '@import url(\'something\')',
+                    '@import    \'url()\'',
+                    '@import    " url() "',
+                    '@import url(\"something\")',
+                    '@import \'actualScss\''
                 ];
 
                 var filtered = filterCssImports(imports);
