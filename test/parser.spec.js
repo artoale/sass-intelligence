@@ -1,15 +1,14 @@
-/*globals define:true, module:true, exports:true, require:true*/
+/*globals module:true, exports:true, require:true*/
 if (typeof module === 'object' && typeof define !== 'function') {
-    var define = function (factory) {
+    define = function (factory) {
         'use strict';
         module.exports = factory(require, exports, module);
     };
 }
 
-define(function (require, exports, module) {
+define(function (require) {
     'use strict';
 
-    var di = require('di');
 
     var parserMaker = require('../src/parser.js');
     var expect = require('chai').expect;
@@ -45,7 +44,7 @@ define(function (require, exports, module) {
         });
 
         describe('filterCssImports', function () {
-            var filterCssImports
+            var filterCssImports;
             beforeEach(function () {
                 filterCssImports = parserMaker().filterCssImports;
             });

@@ -1,0 +1,9 @@
+{
+    "globals":{
+        "describe": true,
+        "define": true,
+        "it": true,
+        "module": true
+    },
+    "expr": true
+}
