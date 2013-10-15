@@ -4,4 +4,4 @@ components
 lib-cov
 npm-debug.log
 .DS_Store
-
+coverage/
