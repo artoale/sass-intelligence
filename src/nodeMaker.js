@@ -45,7 +45,7 @@ var nodeMaker = function (pathResolver) {
     };
 
     var _makeImport = function (directive, currentFilePath) {
-        var relativePath = directive.match(/@import\s+['"]{0,1}([^'"]*)['"]{0,1}\s*;$/)[1];
+        var relativePath = directive.match(/@import\s*['"]{0,1}([^'"]*)['"]{0,1}\s*;$/)[1];
         return {
             type: 'import',
             id: pathResolver(relativePath, currentFilePath),

@@ -100,7 +100,9 @@ describe('nodeMaker', function () {
                 var inputStrings = [
                     '@import fileToImport;',
                     '@import "fileToImport";',
-                    '@import \'fileToImport\';'
+                    '@import"fileToImport";',
+                    '@import \'fileToImport\';',
+                    '@import\'fileToImport\';'
                 ];
                 var node = {
                     type: 'import',
