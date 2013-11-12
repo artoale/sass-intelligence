@@ -1,0 +1,12 @@
+$global: 1px;
+
+html {
+    $local: 2px;
+    body {
+        $moreLocal: 3px;
+        @mixin pippo () { color: red; }
+    }
+    $local2: 4px;
+}
+
+$global2: 5px;

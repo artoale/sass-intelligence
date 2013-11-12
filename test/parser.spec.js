@@ -2,25 +2,28 @@ var parserMaker = require('../src/parser.js'),
     chai = require('chai'),
     expect,
     sinonChai = require('sinon-chai'),
-//  fs = require('fs'),
+    fs = require('fs'),
+    chaiAsPromised = require('chai-as-promised'),
+    Q = require('q'),
     correctFile,
-    emptyFile,
+    emptyFile = '',
     incorrectFile;
-//    correctFile = fs.readFileSync('mock/correctSASS.scss'),
-//    emptyFile = fs.readFileSync('mock/empty.scss'),
-//    incorrectFile = fs.readFileSync('mock/incorrectSASS.scss');
+
+correctFile = fs.readFileSync(__dirname + '/fixtures/correct.scss'),
+incorrectFile = fs.readFileSync(__dirname + '/fixtures/incorrect.scss'),
 
 chai.use(sinonChai);
+chai.use(chaiAsPromised);
 expect = chai.expect;
 
 
-describe.skip('parser', function () {
+describe('parser', function () {
     'use strict';
     var parser;
+
     beforeEach(function () {
         parser = parserMaker();
     });
-
 
     it('should be a function', function () {
         expect(parserMaker).to.be.a('function');
@@ -29,59 +32,131 @@ describe.skip('parser', function () {
         expect(parserMaker()).to.be.an('object');
     });
 
-
     describe('parse', function () {
         it('should be a function', function () {
             expect(parser.parse).to.be.a('function');
         });
 
-        it('should return an object'),
-
-        function () {
-            expect(parser.parse(correctFile)).to.be.a('object');
-        },
-
-        it('should return an object that contains the properties start, end, directives in any case'),
-
-        function () {
-            expect(parser.parse(correctFile)).to.have.keys(['start', 'end', 'directives']);
-            expect(parser.parse(emptyFile)).to.have.keys(['start', 'end', 'directives']);
-            expect(parser.parse(incorrectFile)).to.have.keys(['start', 'end', 'directives']);
-
-
-        },
-
-        it('should return object without directives for a file without them', function () {
-            expect(parser.parse(correctFile).directives).to.be.empty;
+        it('should return an object', function (done) {
+            expect(parser.parse(correctFile)).to.eventually.be.an('object').and.notify(done);
         });
 
-        it('should extract all the @import directives from a string', function () {
-            var parser = parserMaker();
+        it('should return an object that contains the properties start, end, directives in any case', function (done) {
+            Q.all([parser.parse(emptyFile), parser.parse(correctFile), parser.parse(incorrectFile)]).done(function (results) {
+                expect(results[0]).to.have.keys(['start', 'end', 'directives']);
+                expect(results[1]).to.have.keys(['start', 'end', 'directives']);
+                expect(results[2]).to.have.keys(['start', 'end', 'directives']);
+                done();
+            });
+        });
+
+        // Empty scopes are not cleaned-up if empty...should they?
+        //        it('should return an object with no directives for regular css', function () {
+        //            expect(parser.parse(correctFile).directives).to.be.empty;
+        //        });
+        //
+        it('should extract all the $variable declaration from a string', function (done) {
             var testString = ['bla bla bla',
-                              '  @import cazzitua;',
-                              '@import url(\'cazzimia\'); asdasd',
-                              'oh, cristo cristo'].join('\n');
-            var result = parser.extractImportDirectives(testString);
-            expect(Array.isArray(result)).to.be.true;
-            expect(result).to.have.length(2);
-            expect(result[0]).to.equal('@import cazzitua');
-            expect(result[1]).to.equal('@import url(\'cazzimia\')');
+                              '  $variable: var1;',
+                              'bla bla  $var2: var2; ',
+                              'oh, cristo  $variabl3: var3;'].join('\n'),
+                result = parser.parse(testString);
+
+            expect(Q.all([
+                expect(result.get('directives').get(0)).to.eventually.equal('$variable: var1;'),
+                expect(result.get('directives').get(1)).to.eventually.equal('$var2: var2;'),
+                expect(result.get('directives').get(2)).to.eventually.equal('$variabl3: var3;')
+            ])).to.notify(done);
+        });
+
+        it('should extract all the $variable even if in the same line', function (done) {
+            var testString = ['bla bla bla',
+                              '  $variable: var1;',
+                              'bla bla  $var2: var2; ',
+                              'oh, cristo  $variabl3: var3;'].join(''),
+                result = parser.parse(testString);
+
+            expect(Q.all([
+                expect(result.get('directives').get(0)).to.eventually.equal('$variable: var1;'),
+                expect(result.get('directives').get(1)).to.eventually.equal('$var2: var2;'),
+                expect(result.get('directives').get(2)).to.eventually.equal('$variabl3: var3;')
+            ])).to.notify(done);
+        });
+
+        it('should handle $variables in nested scopes', function (done) {
+            var testArray = [
+                '$var1: red;',
+                'body {',
+                '$var2: black;',
+                '}',
+                '$var3: yellow;'
+            ];
+            var testString = testArray.join('\n');
+            var result = parser.parse(testString);
+            expect(Q.all([
+                expect(result.get('directives').get(0)).to.eventually.equal(testArray[0]),
+                expect(result.get('directives').get(1).get('directives').get(0)).to.eventually.equal(testArray[2]),
+                expect(result.get('directives').get(2)).to.eventually.equal(testArray[4])
+            ])).to.notify(done);
+        });
+        it('should handle $variables in nested scopes  even if in the same line', function (done) {
+            var testArray = [
+                '$var1: red;',
+                'body {',
+                '$var2: black;',
+                '}',
+                '$var3: yellow;'
+            ];
+            var testString = testArray.join('');
+            var result = parser.parse(testString);
+            expect(Q.all([
+                expect(result.get('directives').get(0)).to.eventually.equal(testArray[0]),
+                expect(result.get('directives').get(1).get('directives').get(0)).to.eventually.equal(testArray[2]),
+                expect(result.get('directives').get(2)).to.eventually.equal(testArray[4])
+            ])).to.notify(done);
+        });
+
+
+        describe('@mixin handling', function () {
+            it('should extract @mixin without arguments', function (done) {
+                var testString = '  @mixin aMixin {}',
+                    result = parser.parse(testString);
+                expect(result.get('directives').get(0)).to.eventually.equal('@mixin aMixin ').and.notify(done);
+            });
+
+            it('should extract @mixin with arguments', function (done) {
+                var testString = '  @mixin aMixin ($arg1, $arg2: red, $arg3) {    }',
+                    result = parser.parse(testString);
+                expect(result.get('directives').get(0)).to.eventually.equal('@mixin aMixin ($arg1, $arg2: red, $arg3) ').and.notify(done);
+            });
+
+            it('should extract @mixin inside a scope', function (done) {
+                var testString = [
+                    'html, body {',
+                    '    @mixin () {',
+                    '        border-width: 12px;',
+                    '    }',
+                    '}',
+                ].join('\n'), result = parser.parse(testString);
+                expect(result.get('directives').get(0).get('directives').get(0)).to.eventually.equal('@mixin () ').and.notify(done);
+            });
         });
     });
 
-    describe('filterCssImports', function () {
+    describe.skip('filterCssImports', function () {
         var filterCssImports;
         beforeEach(function () {
             filterCssImports = parserMaker().filterCssImports;
         });
         it('should remove imports to .css files', function () {
-            var imports = ['@import \'something.css',
-                           '@import \'something.css ',
-                           '@import "something.css"',
-                           '@import \'actualScss\''
-            ];
+            var imports = [
+                '@import \'something.css',
+                '@import \'something.css ',
+                '@import "something.css"',
+                '@import \'actualScss\''
+            ],
+            filtered = filterCssImports(imports);
 
-            var filtered = filterCssImports(imports);
             expect(filtered).to.have.length(1);
             expect(filtered[0]).to.equal(imports[imports.length - 1]);
         });
