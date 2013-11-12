@@ -11,7 +11,7 @@ module.exports = function () {
         regex: /\$\w+\s*:\s*\w+\s*;/,
         type: 'variable'
     }, {
-        regex: /@import\s+['"]?[^'";]*['"]?\s*;/,
+        regex: /@import\s*['"]?[^'";]*['"]?\s*;/,
         type: 'import'
     }, {
         regex: /\@mixin\s*[^\s(]*\(?[^)]*\)?\s*(?=[\n{])/,

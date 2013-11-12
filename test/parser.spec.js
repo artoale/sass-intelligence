@@ -132,13 +132,46 @@ describe('parser', function () {
 
             it('should extract @mixin inside a scope', function (done) {
                 var testString = [
-                    'html, body {',
-                    '    @mixin () {',
-                    '        border-width: 12px;',
-                    '    }',
-                    '}',
-                ].join('\n'), result = parser.parse(testString);
+                        'html, body {',
+                        '    @mixin () {',
+                        '        border-width: 12px;',
+                        '    }',
+                        '}',
+                    ].join('\n'),
+                    result = parser.parse(testString);
+
                 expect(result.get('directives').get(0).get('directives').get(0)).to.eventually.equal('@mixin () ').and.notify(done);
+            });
+        });
+        describe('@import handling', function () {
+            it('should extract imports', function (done) {
+                var testString = [
+                        '@import \'something\';',
+                        '@import\'something\' ;',
+                        '@import something;',
+                        '@import"something" ; ',
+                        '@import "something";'
+                    ].join('\n'),
+                    result = parser.parse(testString);
+
+                expect(Q.all([
+                    expect(result.get('directives').get(0)).to.eventually.equal('@import \'something\';'),
+                    expect(result.get('directives').get(1)).to.eventually.equal('@import\'something\' ;'),
+                    expect(result.get('directives').get(2)).to.eventually.equal('@import something;'),
+                    expect(result.get('directives').get(3)).to.eventually.equal('@import"something" ;'),
+                    expect(result.get('directives').get(4)).to.eventually.equal('@import "something";')
+                ])).to.notify(done);
+            });
+
+            it('should extract @import inside a scope', function (done) {
+                var testString = [
+                        'html, body {',
+                        '    @import main;',
+                        '}',
+                    ].join('\n'),
+                    result = parser.parse(testString);
+
+                expect(result.get('directives').get(0).get('directives').get(0)).to.eventually.equal('@import main;').and.notify(done);
             });
         });
     });
