@@ -173,38 +173,34 @@ describe('parser', function () {
 
                 expect(result.get('directives').get(0).get('directives').get(0)).to.eventually.equal('@import main;').and.notify(done);
             });
-        });
-    });
+            it('should remove imports to .css files', function (done) {
+                var imports = [
+                        '@import \'something.css\';',
+                        '@import something.css ;',
+                        '@import "something.css";',
+                        '@import \'actualScss\' ;'
+                    ].join('\n'),
+                    result  = parser.parse(imports);
 
-    describe.skip('filterCssImports', function () {
-        var filterCssImports;
-        beforeEach(function () {
-            filterCssImports = parserMaker().filterCssImports;
-        });
-        it('should remove imports to .css files', function () {
-            var imports = [
-                '@import \'something.css',
-                '@import \'something.css ',
-                '@import "something.css"',
-                '@import \'actualScss\''
-            ],
-            filtered = filterCssImports(imports);
+                expect(Q.all([
+                    expect(result.get('directives').get('length')).to.eventually.equal(1),
+                    expect(result.get('directives').get(0)).to.eventually.equal('@import \'actualScss\' ;')
+                ])).to.notify(done);
+            });
+            it('should remove imports with "url(...)"', function (done) {
+                var imports = [
+                        '@import url(\'something\') ;',
+                        '@import  url(blabla) ;',
+                        '@import    url("blalba") ;',
+                        '@import \'actualScss\';'
+                    ].join('\n'),
+                    result  = parser.parse(imports);
 
-            expect(filtered).to.have.length(1);
-            expect(filtered[0]).to.equal(imports[imports.length - 1]);
-        });
-        it('should remove imports with url', function () {
-            var imports = [
-                '@import url(\'something\')',
-                '@import    \'url()\'',
-                '@import    " url() "',
-                '@import url(\"something\")',
-                '@import \'actualScss\''
-            ];
-
-            var filtered = filterCssImports(imports);
-            expect(filtered).to.have.length(1);
-            expect(filtered[0]).to.equal(imports[imports.length - 1]);
+                expect(Q.all([
+                    expect(result.get('directives').get('length')).to.eventually.equal(1),
+                    expect(result.get('directives').get(0)).to.eventually.equal('@import \'actualScss\';')
+                ])).to.notify(done);
+            });
         });
     });
 });

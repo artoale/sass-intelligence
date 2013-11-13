@@ -18,6 +18,11 @@ module.exports = function () {
         type: 'mixin'
     }];
 
+    var filters = [{
+        regex: /@import\s*['"]?[^'";]*\.css\s*['"]?\s*;/
+    }, {
+        regex: /@import\s+url\(['"]?[^'";]*['"]?\s*\)\s*;/
+    }];
 
     var parse = function _parse(input) {
         var lexer = new Lexer(),
@@ -34,6 +39,13 @@ module.exports = function () {
                 end: null,
                 directives: []
             };
+        var filtersHandler = function (lexeme) {
+            cols += lexeme.length;
+            return 'skip';
+        };
+        filters.forEach(function (rule) {
+            lexer.addRule(rule.regex, filtersHandler);
+        });
         var directiveHandlers = function (lexeme) {
             cols += lexeme.length;
             return lexeme;
