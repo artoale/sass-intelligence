@@ -19,17 +19,31 @@ expect = chai.expect;
 
 describe('parser', function () {
     'use strict';
-    var parser;
-
+    var parser,
+        callCount = 0,
+        expectedCallCount = 0;
+    
     beforeEach(function () {
-        parser = parserMaker();
+        callCount = 0;
+        expectedCallCount = 0;
+        var stubNodeMaker = function (input) {
+            callCount += 1;
+            console.log('input:', input);
+            return input;
+        };
+        parser = parserMaker(stubNodeMaker);
     });
 
+    afterEach(function () {
+        expect(callCount).to.equal(expectedCallCount);
+    });
+    
     it('should be a function', function () {
         expect(parserMaker).to.be.a('function');
     });
     it('should return an object', function () {
         expect(parserMaker()).to.be.an('object');
+        
     });
 
     describe('parse', function () {
@@ -39,6 +53,7 @@ describe('parser', function () {
 
         it('should return an object', function (done) {
             expect(parser.parse(correctFile)).to.eventually.be.an('object').and.notify(done);
+            expectedCallCount = 6;
         });
 
         it('should return an object that contains the properties start, end, directives in any case', function (done) {
@@ -48,8 +63,9 @@ describe('parser', function () {
                 expect(results[2]).to.have.keys(['start', 'end', 'directives']);
                 done();
             });
+            expectedCallCount = 12;
         });
-
+ 
         // Empty scopes are not cleaned-up if empty...should they?
         //        it('should return an object with no directives for regular css', function () {
         //            expect(parser.parse(correctFile).directives).to.be.empty;
@@ -67,6 +83,7 @@ describe('parser', function () {
                 expect(result.get('directives').get(1)).to.eventually.equal('$var2: var2;'),
                 expect(result.get('directives').get(2)).to.eventually.equal('$variabl3: var3;')
             ])).to.notify(done);
+            expectedCallCount = 3;
         });
 
         it('should extract all the $variable even if in the same line', function (done) {
@@ -81,6 +98,7 @@ describe('parser', function () {
                 expect(result.get('directives').get(1)).to.eventually.equal('$var2: var2;'),
                 expect(result.get('directives').get(2)).to.eventually.equal('$variabl3: var3;')
             ])).to.notify(done);
+            expectedCallCount = 3;
         });
 
         it('should handle $variables in nested scopes', function (done) {
@@ -98,6 +116,7 @@ describe('parser', function () {
                 expect(result.get('directives').get(1).get('directives').get(0)).to.eventually.equal(testArray[2]),
                 expect(result.get('directives').get(2)).to.eventually.equal(testArray[4])
             ])).to.notify(done);
+            expectedCallCount = 3;
         });
         it('should handle $variables in nested scopes  even if in the same line', function (done) {
             var testArray = [
@@ -114,6 +133,7 @@ describe('parser', function () {
                 expect(result.get('directives').get(1).get('directives').get(0)).to.eventually.equal(testArray[2]),
                 expect(result.get('directives').get(2)).to.eventually.equal(testArray[4])
             ])).to.notify(done);
+            expectedCallCount = 3;
         });
 
 
@@ -122,12 +142,14 @@ describe('parser', function () {
                 var testString = '  @mixin aMixin {}',
                     result = parser.parse(testString);
                 expect(result.get('directives').get(0)).to.eventually.equal('@mixin aMixin ').and.notify(done);
+                expectedCallCount = 1;
             });
 
             it('should extract @mixin with arguments', function (done) {
                 var testString = '  @mixin aMixin ($arg1, $arg2: red, $arg3) {    }',
                     result = parser.parse(testString);
                 expect(result.get('directives').get(0)).to.eventually.equal('@mixin aMixin ($arg1, $arg2: red, $arg3) ').and.notify(done);
+                expectedCallCount = 1;
             });
 
             it('should extract @mixin inside a scope', function (done) {
@@ -141,6 +163,7 @@ describe('parser', function () {
                     result = parser.parse(testString);
 
                 expect(result.get('directives').get(0).get('directives').get(0)).to.eventually.equal('@mixin () ').and.notify(done);
+                expectedCallCount = 1;
             });
         });
         describe('@import handling', function () {
@@ -161,6 +184,7 @@ describe('parser', function () {
                     expect(result.get('directives').get(3)).to.eventually.equal('@import"something" ;'),
                     expect(result.get('directives').get(4)).to.eventually.equal('@import "something";')
                 ])).to.notify(done);
+                expectedCallCount = 5;
             });
 
             it('should extract @import inside a scope', function (done) {
@@ -172,6 +196,7 @@ describe('parser', function () {
                     result = parser.parse(testString);
 
                 expect(result.get('directives').get(0).get('directives').get(0)).to.eventually.equal('@import main;').and.notify(done);
+                expectedCallCount = 1;
             });
             it('should remove imports to .css files', function (done) {
                 var imports = [
@@ -186,6 +211,7 @@ describe('parser', function () {
                     expect(result.get('directives').get('length')).to.eventually.equal(1),
                     expect(result.get('directives').get(0)).to.eventually.equal('@import \'actualScss\' ;')
                 ])).to.notify(done);
+                expectedCallCount = 1;
             });
             it('should remove imports with "url(...)"', function (done) {
                 var imports = [
@@ -200,6 +226,17 @@ describe('parser', function () {
                     expect(result.get('directives').get('length')).to.eventually.equal(1),
                     expect(result.get('directives').get(0)).to.eventually.equal('@import \'actualScss\';')
                 ])).to.notify(done);
+                expectedCallCount = 1;
+            });
+        });
+        
+        describe('@function handling', function () {
+
+            it('should extract @function with arguments', function (done) {
+                var testString = '@function grid-width($n) {/n @return $n * $grid-width + ($n - 1) * $gutter-width; \n}',
+                    result = parser.parse(testString);
+                expect(result.get('directives').get(0)).to.eventually.equal('@function grid-width($n) ').and.notify(done);
+                expectedCallCount = 1;
             });
         });
     });

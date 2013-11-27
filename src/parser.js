@@ -3,7 +3,7 @@
 var Q = require('q');
 var Lexer = require('lex');
 
-module.exports = function () {
+module.exports = function (nodeMaker) {
     'use strict';
 
 
@@ -14,8 +14,11 @@ module.exports = function () {
         regex: /@import\s*['"]?[^'";]*['"]?\s*;/,
         type: 'import'
     }, {
-        regex: /\@mixin\s*[^\s(]*\(?[^)]*\)?\s*(?=[\n{])/,
+        regex: /\@mixin\s*[^\s(]*\(?[^)]*\)?\s*(?=[\n{])/, //positive lookahead to match everything expect the ending { or \n
         type: 'mixin'
+    }, {
+        regex: /\@function\s*[^\s(]*\(?[^)]*\)?\s*(?=[\n{])/,
+        type: 'function'
     }];
 
     var filters = [{
@@ -23,7 +26,7 @@ module.exports = function () {
     }, {
         regex: /@import\s+url\(['"]?[^'";]*['"]?\s*\)\s*;/
     }];
-
+ 
     var parse = function _parse(input) {
         var lexer = new Lexer(),
             cols = 1,
@@ -101,9 +104,12 @@ module.exports = function () {
             retval = lexer.lex();
             if (retval) {
                 if (retval !== 'skip') {
-                    currentScope.directives.push(retval);
                     if (typeof retval === 'object' && retval.directives) {
+                        currentScope.directives.push(retval);
                         currentScope = retval;
+                    } else {
+                        retval = nodeMaker(retval);
+                        currentScope.directives.push(retval);
                     }
                 }
                 process.nextTick(lex);

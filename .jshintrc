@@ -4,7 +4,8 @@
         "define": true,
         "it": true,
         "module": true,
-        "beforeEach":true
+        "beforeEach":true,
+        "afterEach":true
     },
     "node": true,
     "eqeqeq": true,

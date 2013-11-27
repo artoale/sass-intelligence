@@ -14,8 +14,6 @@ describe('nodeMaker', function () {
         expect(nodeMakerFactory()).to.be.an('object');
     });
 
-
-
     describe('function make', function () {
         var make;
         beforeEach(function () {
