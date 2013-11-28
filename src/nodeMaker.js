@@ -5,7 +5,7 @@ var nodeMaker = function (pathResolver) {
         var id = '',
             value = '',
             matches;
-        matches = directive.match(/^(\$\w+)\s*:\s*(\S*);$/);
+        matches = directive.match(/^(\$[a-zA-Z0-9_-]+)\s*:\s*(\S*);$/);
         id = matches[1];
         value = matches[2];
 
@@ -19,7 +19,7 @@ var nodeMaker = function (pathResolver) {
 
 
     var _makeMixin = function (directive) {
-        var matches = directive.match(/^@mixin\s*([^\s(]*)(\({0,1}).*$/),
+        var matches = directive.match(/^@mixin\s*([^(]*)(\(?).*$/),
             id = matches[1],
             params = !! matches[2];
 
@@ -44,11 +44,11 @@ var nodeMaker = function (pathResolver) {
         };
     };
 
-    var _makeImport = function (directive, currentFilePath) {
+    var _makeImport = function (directive) {
         var relativePath = directive.match(/@import\s*['"]{0,1}([^'"]*)['"]{0,1}\s*;$/)[1];
         return {
             type: 'import',
-            id: pathResolver(relativePath, currentFilePath),
+            id: pathResolver(relativePath),
             original: directive
         };
     };
@@ -71,7 +71,7 @@ var nodeMaker = function (pathResolver) {
      */
     var make = function (directive, currentFilePath) {
         var type;
-        if (directive.match(/^\$\w+:.*;$/)) {
+        if (directive.match(/\$\S+\s*:\s*\$?[a-zA-Z0-9_-]+\s*;/)) {
             type = 'variable';
         } else if (directive.indexOf('@mixin') === 0) {
             type = 'mixin';
@@ -82,7 +82,7 @@ var nodeMaker = function (pathResolver) {
         } else {
             throw new Error('String "' + directive + '" not recognised as a valid directive');
         }
-        return switcher[type](directive, currentFilePath);
+        return switcher[type](directive);
     };
     return {
         make: make

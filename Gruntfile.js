@@ -21,16 +21,19 @@ module.exports = function (grunt) {
         },
         watch: {
             liveTest: {
-                files: ['test/**/*.spec.js', 'src/**/*.js'],
+                files: ['test/**/*.spec.js', 'src/**/*.js', 'test/functional/*.js'],
                 tasks: ['mochaTest']
             }
         },
         mochaTest: {
-            test: {
-                options: {
-                    reporter: 'spec'
-                },
+            options: {
+                reporter: 'spec'
+            },
+            unit: {
                 src: ['test/**/*.spec.js']
+            },
+            functional: {
+                src: ['test/functional/*.js']
             }
         }
 

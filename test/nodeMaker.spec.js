@@ -5,7 +5,7 @@ describe('nodeMaker', function () {
         sinon = require('sinon'),
         expect,
         nodeMakerFactory = require('../src/nodeMaker');
-
+ 
     chai.use(sinonChai);
     expect = chai.expect;
 
@@ -127,7 +127,7 @@ describe('nodeMaker', function () {
                 inputStrings.forEach(function (inputString) {
                     make(inputString, 'currentFile');
                 });
-                expect(stub).to.have.always.been.calledWith('fileToImport', 'currentFile');
+                expect(stub).to.have.always.been.calledWith('fileToImport');
             });
         });
     });

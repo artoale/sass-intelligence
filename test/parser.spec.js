@@ -22,13 +22,13 @@ describe('parser', function () {
     var parser,
         callCount = 0,
         expectedCallCount = 0;
-    
+
     beforeEach(function () {
         callCount = 0;
         expectedCallCount = 0;
         var stubNodeMaker = function (input) {
             callCount += 1;
-            console.log('input:', input);
+//            console.log('input:', input);
             return input;
         };
         parser = parserMaker(stubNodeMaker);
@@ -37,13 +37,13 @@ describe('parser', function () {
     afterEach(function () {
         expect(callCount).to.equal(expectedCallCount);
     });
-    
+
     it('should be a function', function () {
         expect(parserMaker).to.be.a('function');
     });
     it('should return an object', function () {
         expect(parserMaker()).to.be.an('object');
-        
+
     });
 
     describe('parse', function () {
@@ -65,7 +65,7 @@ describe('parser', function () {
             });
             expectedCallCount = 12;
         });
- 
+
         // Empty scopes are not cleaned-up if empty...should they?
         //        it('should return an object with no directives for regular css', function () {
         //            expect(parser.parse(correctFile).directives).to.be.empty;
@@ -139,9 +139,9 @@ describe('parser', function () {
 
         describe('@mixin handling', function () {
             it('should extract @mixin without arguments', function (done) {
-                var testString = '  @mixin aMixin {}',
+                var testString = '  @mixin a-mixin {\n}',
                     result = parser.parse(testString);
-                expect(result.get('directives').get(0)).to.eventually.equal('@mixin aMixin ').and.notify(done);
+                expect(result.get('directives').get(0)).to.eventually.equal('@mixin a-mixin ').and.notify(done);
                 expectedCallCount = 1;
             });
 
@@ -229,13 +229,28 @@ describe('parser', function () {
                 expectedCallCount = 1;
             });
         });
-        
+
         describe('@function handling', function () {
 
             it('should extract @function with arguments', function (done) {
                 var testString = '@function grid-width($n) {/n @return $n * $grid-width + ($n - 1) * $gutter-width; \n}',
                     result = parser.parse(testString);
                 expect(result.get('directives').get(0)).to.eventually.equal('@function grid-width($n) ').and.notify(done);
+                expectedCallCount = 1;
+            });
+        });
+
+        describe('nested scope', function () {
+            it('should not return empty scopes', function (done) {
+                var input = [
+                        '@mixin blalba {',
+                        ' @import  url(blabla) ;',
+                        ' background-color: black;',
+                        '}'
+                    ].join('\n'),
+                    result  = parser.parse(input);
+
+                expect(result.get('directives').get('length')).to.eventually.equal(1).and.notify(done),
                 expectedCallCount = 1;
             });
         });
