@@ -2,7 +2,12 @@
 /*jslint vars:true, node:true*/
 var Q = require('q');
 var Lexer = require('lex');
-
+if (typeof setImmediate !== 'function') {
+    global.setImmediate = function(fn) {
+        'use strict';
+        setTimeout(fn,0);
+    };
+}
 module.exports = function (nodeMaker) {
     'use strict';
 
